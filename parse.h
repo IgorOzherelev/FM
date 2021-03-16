@@ -3,20 +3,20 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
+#include <set>
 
-inline std::vector<std::uint32_t> *parse_into_vector(const std::string& line);
+inline std::set<std::uint32_t> *parse_into_set(const std::string& line);
 
-inline std::vector<std::uint32_t> *parse_into_vector(const std::string& line) {
+inline std::set<std::uint32_t> *parse_into_set(const std::string& line) {
     std::stringstream stream_str(line);
-    auto *vec = new std::vector<std::uint32_t>();
+    auto *set = new std::set<std::uint32_t>();
 
     std::uint32_t var;
     while (stream_str >> var) {
-        vec->push_back(var);
+        set->insert(var);
     }
 
-    return vec;
+    return set;
 }
 
 #endif //FM_PARSE_H
