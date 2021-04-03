@@ -1,5 +1,5 @@
-#ifndef FM_IO_H
-#define FM_IO_H
+#ifndef FM_UTILS_H
+#define FM_UTILS_H
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -46,4 +46,4 @@ inline std::string get_pwd() {
     return current_dir;
 }
 
-#endif //FM_IO_H
+#endif //FM_UTILS_H

@@ -1,22 +1,18 @@
 #ifndef FM_PARSE_H
 #define FM_PARSE_H
 
-#include <iostream>
-#include <string>
-#include <set>
+std::vector<std::uint32_t> *parse_into_vec(const std::string& line);
 
-inline std::set<std::uint32_t> *parse_into_set(const std::string& line);
-
-inline std::set<std::uint32_t> *parse_into_set(const std::string& line) {
+std::vector<std::uint32_t> *parse_into_vec(const std::string& line) {
     std::stringstream stream_str(line);
-    auto *set = new std::set<std::uint32_t>();
+    auto *vec = new std::vector<std::uint32_t>();
 
     std::uint32_t var;
     while (stream_str >> var) {
-        set->insert(var);
+        vec->push_back(var);
     }
 
-    return set;
+    return vec;
 }
 
 #endif //FM_PARSE_H
