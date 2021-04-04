@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "../headers/utils.h"
 
 std::string get_input_file_name(int args, char** argv) {
     std::string file_name = "/";

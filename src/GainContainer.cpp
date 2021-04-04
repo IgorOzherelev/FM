@@ -1,4 +1,4 @@
-#include "GainContainer.h"
+#include "../headers/GainContainer.h"
 
 void GainContainer::init() {
     for (std::uint32_t vex_id = 0; vex_id < partition->get_graph()->vex_num; vex_id++) {

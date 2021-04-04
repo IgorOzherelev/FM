@@ -3,4 +3,4 @@ project(FM)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(FM main.cpp parse.h utils.h HyperGraph.h HyperGraph.cpp Partition.cpp Partition.h GainContainer.cpp GainContainer.h parse.cpp utils.cpp)
+add_executable(FM main.cpp headers/parse.h headers/utils.h headers/HyperGraph.h src/HyperGraph.cpp src/Partition.cpp headers/Partition.h src/GainContainer.cpp headers/GainContainer.h src/parse.cpp src/utils.cpp)

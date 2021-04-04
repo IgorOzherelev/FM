@@ -2,7 +2,7 @@
 // Created by i9163 on 04.04.2021.
 //
 
-#include "Partition.h"
+#include "../headers/Partition.h"
 
 void Partition::init_vertices() {
     // размер левой части

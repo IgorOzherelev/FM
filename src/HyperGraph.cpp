@@ -1,4 +1,4 @@
-#include "HyperGraph.h"
+#include "../headers/HyperGraph.h"
 
 HyperGraph::HyperGraph(const std::string &filename) {
     std::ifstream file(filename);

@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-#include "HyperGraph.h"
-#include "Partition.h"
-#include "GainContainer.h"
+#include "headers/HyperGraph.h"
+#include "headers/Partition.h"
+#include "headers/GainContainer.h"
 
 void apply(GainContainer *container, Partition *partition, std::pair<std::uint32_t, int> best_move) {
     std::uint32_t best_move_vex_id = best_move.first;

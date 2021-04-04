@@ -1,4 +1,4 @@
-#include "parse.h"
+#include "../headers/parse.h"
 
 std::vector<std::uint32_t> *parse_into_vec(const std::string& line) {
     std::stringstream stream_str(line);
