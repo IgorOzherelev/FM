@@ -1,7 +1,3 @@
-//
-// Created by i9163 on 04.04.2021.
-//
-
 #include "../headers/Partition.h"
 
 void Partition::init_vertices() {
@@ -28,6 +24,7 @@ void Partition::init_side_sizes() {
 }
 
 Partition::~Partition() {
+    std::free(vertices_part);
     std::free(left_net_sizes);
     std::free(right_net_sizes);
 }
@@ -44,9 +41,13 @@ Partition::Partition(HyperGraph *graph, std::size_t imbalance) {
     init_side_sizes();
 }
 
-void Partition::rollback_sizes() {
+void Partition::rollback(const std::vector<std::uint32_t>& rollback_vex) {
     std::free(left_net_sizes);
     std::free(right_net_sizes);
+
+    for (auto vex : rollback_vex) {
+        this->update(vex);
+    }
 
     left_net_sizes = (std::uint32_t*)std::calloc(graph->nets_num, sizeof(std::uint32_t));
     right_net_sizes = (std::uint32_t*)std::calloc(graph->nets_num, sizeof(std::uint32_t));

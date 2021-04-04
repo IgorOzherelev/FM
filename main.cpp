@@ -80,10 +80,7 @@ std::uint32_t FMPass(GainContainer *container, Partition *partition) {
         apply(container, partition, best_move);
     }
 
-    for (auto vex : rollback_vex) {
-        partition->update(vex);
-    }
-    partition->rollback_sizes();
+    partition->rollback(rollback_vex);
 
     return best_cost;
 }

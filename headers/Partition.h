@@ -1,7 +1,3 @@
-//
-// Created by i9163 on 04.04.2021.
-//
-
 #ifndef FM_PARTITION_H
 #define FM_PARTITION_H
 
@@ -26,7 +22,7 @@ public:
     ~Partition();
     Partition(HyperGraph *graph, std::size_t imbalance);
 
-    void rollback_sizes();
+    void rollback(const std::vector<std::uint32_t>& rollback_vex);
 
     std::uint32_t get_cost();
 
