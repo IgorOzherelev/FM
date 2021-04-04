@@ -43,7 +43,10 @@ public:
     std::int64_t balance = 0;
     std::size_t imbalance = 0;
 
-    ~Partition() = default;
+    ~Partition() {
+        std::free(left_net_sizes);
+        std::free(right_net_sizes);
+    }
     Partition(HyperGraph *graph, std::size_t imbalance) {
         this->graph = graph;
         this->left_net_sizes = (std::uint32_t*)std::calloc(graph->nets_num, sizeof(std::uint32_t));
@@ -156,7 +159,10 @@ public:
     // массив gain для каждой вершины
     int *vex_gains;
 
-    ~GainContainer() = default;
+    ~GainContainer() {
+        std::free(free_array);
+        std::free(vex_gains);
+    }
     GainContainer(Partition *partition) {
         this->partition = partition;
         this->free_array = (char*)std::calloc(partition->get_graph()->vex_num, sizeof(char));
@@ -327,7 +333,7 @@ std::uint32_t FMPass(GainContainer *container, Partition *partition) {
         auto best_move = container->feasible_move();
         rollback_vex.push_back(best_move.first);
         solution_cost -= best_move.second;
-        std::cout << "step: " << step++ << " solution_cost: " << solution_cost << "\n";
+        std::cout << "step: " << step++ << " best_cost: " << best_cost << " balance: " << partition->balance <<"\n";
         if (solution_cost < best_cost) {
             best_cost = solution_cost;
             rollback_vex.erase(rollback_vex.begin(), rollback_vex.end());
@@ -335,6 +341,7 @@ std::uint32_t FMPass(GainContainer *container, Partition *partition) {
         apply(container, partition, best_move);
     }
 
+    partition->store("final-partition.txt");
     // rollback partition
     for (auto vex : rollback_vex) {
         partition->update(vex);
@@ -365,13 +372,11 @@ int main(int args, char **argv) {
     Partition partition(&graph, 1);
     partition.store("init-partition.txt");
 
-    FM(&partition);
-//    GainContainer container(&partition);
-//    FMPass(&container, &partition);
+    //FM(&partition);
+    GainContainer container(&partition);
+    std::cout << "best cost: " << FMPass(&container, &partition) << "\n";
 
-//    auto var = container.feasible_move();
-//    apply(&container, &partition, var);
-    partition.store("final-partition.txt");
+    //partition.store("final-partition.txt");
 
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " mc" << std::endl;
