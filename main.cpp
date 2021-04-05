@@ -97,11 +97,10 @@ void FM(Partition *partition, const std::string& logfile_name, bool is_modified)
 
     std::uint32_t step = 1;
     logfile << "[GRAPH]: " << "[NETS:] " << partition->get_graph()->nets_num << " [VERTICES:] " << partition->get_graph()->vex_num << std::endl;
-    logfile << "[PARTITION PARAMETERS]: " << "[IMBALANCE]: " << partition->imbalance << std::endl;
     while (!is_quality_improved) {
         auto container = new GainContainer(partition);
         std::uint32_t best_cost = FMPass(container, partition, is_modified);
-        logfile << "[STEP]: " << step++ << " [BEST COST]: " << best_cost << " [BALANCE]: " << partition->balance << std::endl;
+        logfile << "[STEP]: " << step++ << " [BEST COST]: " << best_cost << std::endl;
         if (best_cost == partition->solution_cost)
             is_quality_improved = true;
         else
@@ -119,7 +118,7 @@ void run_benchmarks(const std::vector<std::string>& names, bool is_modified) {
         std::cout << name << " test is started " << std::endl;
         std::string filename = get_input_file_name(name);
         auto *graph = new HyperGraph(filename);
-        auto *partition = new Partition(graph, 1);
+        auto *partition = new Partition(graph, 0.4 * graph->vex_num);
 
         std::string output_filename = name;
         std::size_t pos_hgr = output_filename.find(".hgr");
