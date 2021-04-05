@@ -64,13 +64,17 @@ void apply(GainContainer *container, Partition *partition, std::pair<std::uint32
     partition->update(best_move_vex_id);
 }
 
-std::uint32_t FMPass(GainContainer *container, Partition *partition) {
+std::uint32_t FMPass(GainContainer *container, Partition *partition, bool is_modified) {
     std::uint32_t solution_cost = partition->get_cost();
     std::uint32_t best_cost = solution_cost;
 
     std::vector<std::uint32_t> rollback_vex;
+    std::pair<std::uint32_t, int> best_move;
     while (!container->is_empty()) {
-        auto best_move = container->feasible_move();
+        if (is_modified)
+            best_move = container->feasible_move_modified();
+        else
+            best_move = container->feasible_move();
         rollback_vex.push_back(best_move.first);
         solution_cost -= best_move.second;
         if (solution_cost < best_cost) {
@@ -85,7 +89,7 @@ std::uint32_t FMPass(GainContainer *container, Partition *partition) {
     return best_cost;
 }
 
-void FM(Partition *partition, const std::string& logfile_name) {
+void FM(Partition *partition, const std::string& logfile_name, bool is_modified) {
     bool is_quality_improved = false;
     std::ofstream logfile(logfile_name);
 
@@ -96,7 +100,7 @@ void FM(Partition *partition, const std::string& logfile_name) {
     logfile << "[PARTITION PARAMETERS]: " << "[IMBALANCE]: " << partition->imbalance << std::endl;
     while (!is_quality_improved) {
         auto container = new GainContainer(partition);
-        std::uint32_t best_cost = FMPass(container, partition);
+        std::uint32_t best_cost = FMPass(container, partition, is_modified);
         logfile << "[STEP]: " << step++ << " [BEST COST]: " << best_cost << " [BALANCE]: " << partition->balance << std::endl;
         if (best_cost == partition->solution_cost)
             is_quality_improved = true;
@@ -110,7 +114,7 @@ void FM(Partition *partition, const std::string& logfile_name) {
     logfile.close();
 }
 
-void run_benchmarks(const std::vector<std::string>& names) {
+void run_benchmarks(const std::vector<std::string>& names, bool is_modified) {
     for (const auto& name : names) {
         std::cout << name << " test is started " << std::endl;
         std::string filename = get_input_file_name(name);
@@ -125,15 +129,26 @@ void run_benchmarks(const std::vector<std::string>& names) {
         output_filename.append(".part.2");
         logfile_name.append(".log");
 
-        FM(partition, logfile_name);
+        FM(partition, logfile_name, is_modified);
         partition->store(output_filename);
     }
 }
 
 int main(int args, char **argv) {
+    std::string version;
+    std::cout << "Enter modified or base:" << std::endl;
+    std::cin >> version;
+
+    bool is_modified;
+    if (version == "modified")
+        is_modified = true;
+    else
+        is_modified = false;
+    std::cout << "(version == modified): " << is_modified << std::endl;
 
     if (args == 1) {
         std::cout << "Starting all ISPD98_ibmXX.hgr tests " << "XX - 01, 02,...., 18" << std::endl;
+
         std::vector<std::string> ispd98_names = {
                 "ISPD98_ibm01.hgr", "ISPD98_ibm02.hgr", "ISPD98_ibm03.hgr", "ISPD98_ibm04.hgr",
                 "ISPD98_ibm05.hgr", "ISPD98_ibm06.hgr", "ISPD98_ibm07.hgr", "ISPD98_ibm08.hgr",
@@ -141,7 +156,8 @@ int main(int args, char **argv) {
                 "ISPD98_ibm13.hgr", "ISPD98_ibm14.hgr", "ISPD98_ibm15.hgr", "ISPD98_ibm16.hgr",
                 "ISPD98_ibm17.hgr", "ISPD98_ibm18.hgr"
         };
-        run_benchmarks(ispd98_names);
+
+        run_benchmarks(ispd98_names, is_modified);
 
         std::cout << "Starting all dac2012_superblueXX " << "XX - 2, 3, 6, 7, 9, 11, 12, 14, 16, 19" << std::endl;
         std::vector<std::string> dac2012_names = {
@@ -151,7 +167,7 @@ int main(int args, char **argv) {
                 "dac2012_superblue19.hgr"
         };
 
-        run_benchmarks(dac2012_names);
+        run_benchmarks(dac2012_names, is_modified);
         std::cout << "All tests have been finished" << std::endl;
     }
 
@@ -160,7 +176,7 @@ int main(int args, char **argv) {
 
         std::vector<std::string> name;
         name.emplace_back(argv[1]);
-        run_benchmarks(name);
+        run_benchmarks(name, is_modified);
     } else if (args > 2) {
         std::cout << "[PARAMETERS]: Wrong set of args, enter only the file name to run specific test" << std::endl;
         std::cout << "[HOW TO RUN]: Executable file should be in the same directory as the benchmarks" << std::endl;

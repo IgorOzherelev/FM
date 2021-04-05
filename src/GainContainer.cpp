@@ -109,6 +109,60 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move() {
     return {moved_vex_id, moved_vex_gain};
 }
 
+std::pair<std::uint32_t, int> GainContainer::feasible_move_modified() {
+    bool left_is_empty = left.empty();
+    bool right_is_empty = right.empty();
+
+    int max_gain_right, max_gain_left;
+    std::map<int, std::set<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
+    if (left_is_empty) {
+        max_right_bucket = --right.end();
+        max_gain_right = max_right_bucket->first;
+    } else if (right_is_empty) {
+        max_left_bucket = --left.end();
+        max_gain_left = max_left_bucket->first;
+    }
+
+    if (!left_is_empty && !right_is_empty) {
+        max_left_bucket = --left.end();
+        max_right_bucket = --right.end();
+
+        max_gain_right = max_right_bucket->first;
+        max_gain_left = max_left_bucket->first;
+    }
+
+    if (left_is_empty && right_is_empty) {
+        throw std::runtime_error("Left and Right containers are empty!");
+    }
+
+    std::uint32_t moved_vex_id;
+    int moved_vex_gain;
+    // move from right to left
+    if (left_is_empty || (max_gain_left < max_gain_right && -partition->balance < partition->imbalance)
+        || (partition->balance >= partition->imbalance)) {
+        moved_vex_id = *(--(max_right_bucket->second).end());
+        max_right_bucket->second.erase(--max_right_bucket->second.end());
+
+        if (max_right_bucket->second.empty())
+            right.erase(max_gain_right);
+
+        moved_vex_gain = max_gain_right;
+    } else { // move from left to right
+        moved_vex_id = *(--(max_left_bucket->second).end());
+        max_left_bucket->second.erase(--max_left_bucket->second.end());
+
+        if (max_left_bucket->second.empty())
+            left.erase(max_gain_left);
+
+        moved_vex_gain = max_gain_left;
+    }
+
+    // lock vertex
+    free_array[moved_vex_id] = 1;
+    lock_cnt++;
+    return {moved_vex_id, moved_vex_gain};
+}
+
 void GainContainer::update(std::uint32_t vex_id, int weight) {
     if (free_array[vex_id] == 1) {
         return;
