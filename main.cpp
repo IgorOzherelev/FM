@@ -135,8 +135,10 @@ void run_benchmarks(const std::vector<std::string>& names, bool is_modified) {
 
 int main(int args, char **argv) {
     std::string version;
-    std::cout << "Enter modified or base:" << std::endl;
-    std::cin >> version;
+
+    if (args == 3) {
+        version = argv[2];
+    }
 
     bool is_modified;
     if (version == "modified")
@@ -170,13 +172,13 @@ int main(int args, char **argv) {
         std::cout << "All tests have been finished" << std::endl;
     }
 
-    if (args == 2) {
+    if (args == 2 || args == 3) {
         std::cout << "Run specific test " << argv[1] << std::endl;
 
         std::vector<std::string> name;
         name.emplace_back(argv[1]);
         run_benchmarks(name, is_modified);
-    } else if (args > 2) {
+    } else if (args > 3) {
         std::cout << "[PARAMETERS]: Wrong set of args, enter only the file name to run specific test" << std::endl;
         std::cout << "[HOW TO RUN]: Executable file should be in the same directory as the benchmarks" << std::endl;
         std::cout << "[RESULTS]: Results will be stored in the same directory as the benchmarks"<< std::endl;
