@@ -40,6 +40,7 @@ int GainContainer::compute_vex_gain(std::uint32_t vex_id) {
 GainContainer::~GainContainer() {
     std::free(free_array);
     std::free(vex_gains);
+    std::free(vex_iters);
 }
 
 GainContainer::GainContainer(Partition *partition) {
@@ -58,14 +59,32 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move() {
     bool left_is_empty = left.empty();
     bool right_is_empty = right.empty();
 
+    std::uint32_t moved_vex_id;
+    int moved_vex_gain;
     int max_gain_right, max_gain_left;
     std::map<int, std::list<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
     if (left_is_empty) {
         max_right_bucket = --right.end();
         max_gain_right = max_right_bucket->first;
+
+        moved_vex_id = *((max_right_bucket->second).begin());
+        max_right_bucket->second.erase(max_right_bucket->second.begin());
+
+        if (max_right_bucket->second.empty())
+            right.erase(max_gain_right);
+
+        moved_vex_gain = max_gain_right;
     } else if (right_is_empty) {
         max_left_bucket = --left.end();
         max_gain_left = max_left_bucket->first;
+
+        moved_vex_id = *((max_left_bucket->second).begin());
+        max_left_bucket->second.erase(max_left_bucket->second.begin());
+
+        if (max_left_bucket->second.empty())
+            left.erase(max_gain_left);
+
+        moved_vex_gain = max_gain_left;
     }
 
     if (!left_is_empty && !right_is_empty) {
@@ -74,32 +93,30 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move() {
 
         max_gain_right = max_right_bucket->first;
         max_gain_left = max_left_bucket->first;
+
+        // move from right to left
+        if (max_gain_left < max_gain_right && -partition->balance < partition->imbalance
+            || (partition->balance >= partition->imbalance)) {
+            moved_vex_id = *((max_right_bucket->second).begin());
+            max_right_bucket->second.erase(max_right_bucket->second.begin());
+
+            if (max_right_bucket->second.empty())
+                right.erase(max_gain_right);
+
+            moved_vex_gain = max_gain_right;
+        } else { // move from left to right
+            moved_vex_id = *((max_left_bucket->second).begin());
+            max_left_bucket->second.erase(max_left_bucket->second.begin());
+
+            if (max_left_bucket->second.empty())
+                left.erase(max_gain_left);
+
+            moved_vex_gain = max_gain_left;
+        }
     }
 
     if (left_is_empty && right_is_empty) {
         throw std::runtime_error("Left and Right containers are empty!");
-    }
-
-    std::uint32_t moved_vex_id;
-    int moved_vex_gain;
-    // move from right to left
-    if (left_is_empty || (max_gain_left < max_gain_right && -partition->balance < partition->imbalance)
-        || (partition->balance >= partition->imbalance)) {
-        moved_vex_id = *((max_right_bucket->second).begin());
-        max_right_bucket->second.erase(max_right_bucket->second.begin());
-
-        if (max_right_bucket->second.empty())
-            right.erase(max_gain_right);
-
-        moved_vex_gain = max_gain_right;
-    } else { // move from left to right
-        moved_vex_id = *((max_left_bucket->second).begin());
-        max_left_bucket->second.erase(max_left_bucket->second.begin());
-
-        if (max_left_bucket->second.empty())
-            left.erase(max_gain_left);
-
-        moved_vex_gain = max_gain_left;
     }
 
     // lock vertex
@@ -112,14 +129,32 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move_modified() {
     bool left_is_empty = left.empty();
     bool right_is_empty = right.empty();
 
+    std::uint32_t moved_vex_id;
+    int moved_vex_gain;
     int max_gain_right, max_gain_left;
     std::map<int, std::list<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
     if (left_is_empty) {
         max_right_bucket = --right.end();
         max_gain_right = max_right_bucket->first;
+
+        moved_vex_id = *(--(max_right_bucket->second).end());
+        max_right_bucket->second.erase(--max_right_bucket->second.end());
+
+        if (max_right_bucket->second.empty())
+            right.erase(max_gain_right);
+
+        moved_vex_gain = max_gain_right;
     } else if (right_is_empty) {
         max_left_bucket = --left.end();
         max_gain_left = max_left_bucket->first;
+
+        moved_vex_id = *(--(max_left_bucket->second).end());
+        max_left_bucket->second.erase(--max_left_bucket->second.end());
+
+        if (max_left_bucket->second.empty())
+            left.erase(max_gain_left);
+
+        moved_vex_gain = max_gain_left;
     }
 
     if (!left_is_empty && !right_is_empty) {
@@ -128,32 +163,30 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move_modified() {
 
         max_gain_right = max_right_bucket->first;
         max_gain_left = max_left_bucket->first;
+
+        // move from right to left
+        if ((max_gain_left < max_gain_right && -partition->balance < partition->imbalance)
+            || (partition->balance >= partition->imbalance)) {
+            moved_vex_id = *(--(max_right_bucket->second).end());
+            max_right_bucket->second.erase(--max_right_bucket->second.end());
+
+            if (max_right_bucket->second.empty())
+                right.erase(max_gain_right);
+
+            moved_vex_gain = max_gain_right;
+        } else { // move from left to right
+            moved_vex_id = *(--(max_left_bucket->second).end());
+            max_left_bucket->second.erase(--max_left_bucket->second.end());
+
+            if (max_left_bucket->second.empty())
+                left.erase(max_gain_left);
+
+            moved_vex_gain = max_gain_left;
+        }
     }
 
     if (left_is_empty && right_is_empty) {
         throw std::runtime_error("Left and Right containers are empty!");
-    }
-
-    std::uint32_t moved_vex_id;
-    int moved_vex_gain;
-    // move from right to left
-    if (left_is_empty || (max_gain_left < max_gain_right && -partition->balance < partition->imbalance)
-        || (partition->balance >= partition->imbalance)) {
-        moved_vex_id = *(--(max_right_bucket->second).end());
-        max_right_bucket->second.erase(--max_right_bucket->second.end());
-
-        if (max_right_bucket->second.empty())
-            right.erase(max_gain_right);
-
-        moved_vex_gain = max_gain_right;
-    } else { // move from left to right
-        moved_vex_id = *(--(max_left_bucket->second).end());
-        max_left_bucket->second.erase(--max_left_bucket->second.end());
-
-        if (max_left_bucket->second.empty())
-            left.erase(max_gain_left);
-
-        moved_vex_gain = max_gain_left;
     }
 
     // lock vertex
