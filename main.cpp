@@ -58,9 +58,7 @@ void apply(GainContainer *container, Partition *partition, std::pair<std::uint32
         }
     }
 
-    // free spare memory in container
     // upd partition
-    container->free(best_move, cur_side);
     partition->update(best_move_vex_id);
 }
 
@@ -70,7 +68,7 @@ std::uint32_t FMPass(GainContainer *container, Partition *partition, bool is_mod
 
     std::vector<std::uint32_t> rollback_vex;
     std::pair<std::uint32_t, int> best_move;
-    while (!container->is_empty()) {
+    while (!container->is_all_locked()) {
         if (is_modified)
             best_move = container->feasible_move_modified();
         else
@@ -100,7 +98,7 @@ void FM(Partition *partition, const std::string& logfile_name, bool is_modified)
     while (!is_quality_improved) {
         auto container = new GainContainer(partition);
         std::uint32_t best_cost = FMPass(container, partition, is_modified);
-        logfile << "[STEP]: " << step++ << " [BEST COST]: " << best_cost << std::endl;
+        logfile << "[STEP]: " << step++ << " [BEST COST]: " << best_cost << " [BALANCE]: " << partition->balance << std::endl;
         if (best_cost == partition->solution_cost)
             is_quality_improved = true;
         else
@@ -118,7 +116,7 @@ void run_benchmarks(const std::vector<std::string>& names, bool is_modified) {
         std::cout << name << " test is started " << std::endl;
         std::string filename = get_input_file_name(name);
         auto *graph = new HyperGraph(filename);
-        auto *partition = new Partition(graph, 0.4 * graph->vex_num);
+        auto *partition = new Partition(graph, 2);
 
         std::string output_filename = name;
         std::size_t pos_hgr = output_filename.find(".hgr");
@@ -136,12 +134,14 @@ void run_benchmarks(const std::vector<std::string>& names, bool is_modified) {
 int main(int args, char **argv) {
     std::string version;
 
+//    run_benchmarks({"ISPD98_ibm18.hgr"}, false);
+
     if (args == 3) {
         version = argv[2];
     }
 
     bool is_modified;
-    if (version == "modified")
+    if (version == "-m")
         is_modified = true;
     else
         is_modified = false;

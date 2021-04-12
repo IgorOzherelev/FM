@@ -5,9 +5,11 @@ void GainContainer::init() {
         int vx_gain = compute_vex_gain(vex_id);
 
         if (partition->vertices_part[vex_id] == 0) {
-            left[vx_gain].insert(vex_id);
+            left[vx_gain].push_front(vex_id);
+            vex_iters[vex_id] = left[vx_gain].begin();
         } else {
-            right[vx_gain].insert(vex_id);
+            right[vx_gain].push_front(vex_id);
+            vex_iters[vex_id] = right[vx_gain].begin();
         }
         vex_gains[vex_id] = vx_gain;
     }
@@ -44,11 +46,8 @@ GainContainer::GainContainer(Partition *partition) {
     this->partition = partition;
     this->free_array = (char*)std::calloc(partition->get_graph()->vex_num, sizeof(char));
     this->vex_gains = (int*)std::malloc(sizeof(int) * partition->get_graph()->vex_num);
+    this->vex_iters = (std::list<std::uint32_t>::iterator*)std::malloc(sizeof(std::list<std::uint32_t>::iterator)* partition->get_graph()->vex_num);
     init();
-}
-
-bool GainContainer::is_empty() const {
-    return left.empty() || right.empty();
 }
 
 bool GainContainer::is_all_locked() {
@@ -60,7 +59,7 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move() {
     bool right_is_empty = right.empty();
 
     int max_gain_right, max_gain_left;
-    std::map<int, std::set<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
+    std::map<int, std::list<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
     if (left_is_empty) {
         max_right_bucket = --right.end();
         max_gain_right = max_right_bucket->first;
@@ -114,7 +113,7 @@ std::pair<std::uint32_t, int> GainContainer::feasible_move_modified() {
     bool right_is_empty = right.empty();
 
     int max_gain_right, max_gain_left;
-    std::map<int, std::set<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
+    std::map<int, std::list<std::uint32_t>>::iterator max_left_bucket, max_right_bucket;
     if (left_is_empty) {
         max_right_bucket = --right.end();
         max_gain_right = max_right_bucket->first;
@@ -173,28 +172,20 @@ void GainContainer::update(std::uint32_t vex_id, int weight) {
 
     char cur_side = partition->vertices_part[vex_id];
     if (cur_side == 1) {
-        right[vex_gain].erase(vex_id);
+        auto vex_bucket_iter = vex_iters[vex_id];
+        right[vex_gain].erase(vex_bucket_iter);
         if (right[vex_gain].empty())
             right.erase(vex_gain);
 
-        right[vex_gains[vex_id]].insert(vex_id);
+        right[vex_gains[vex_id]].push_front(vex_id);
+        vex_iters[vex_id] = right[vex_gains[vex_id]].begin();
     } else {
-        left[vex_gain].erase(vex_id);
+        auto vex_bucket_iter = vex_iters[vex_id];
+        left[vex_gain].erase(vex_bucket_iter);
         if (left[vex_gain].empty())
             left.erase(vex_gain);
 
-        left[vex_gains[vex_id]].insert(vex_id);
-    }
-}
-
-void GainContainer::free(std::pair<std::uint32_t, int> best_move, char cur_side) {
-    if (cur_side == 1) {
-        right[best_move.second].erase(best_move.first);
-        if (right[best_move.second].empty())
-            right.erase(best_move.second);
-    } else {
-        left[best_move.second].erase(best_move.first);
-        if (left[best_move.second].empty())
-            left.erase(best_move.second);
+        left[vex_gains[vex_id]].push_front(vex_id);
+        vex_iters[vex_id] = left[vex_gains[vex_id]].begin();
     }
 }
