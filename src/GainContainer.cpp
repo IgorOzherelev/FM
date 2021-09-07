@@ -11,6 +11,7 @@ void GainContainer::init() {
             right[vx_gain].push_front(vex_id);
             vex_iters[vex_id] = right[vx_gain].begin();
         }
+
         vex_gains[vex_id] = vx_gain;
     }
 }

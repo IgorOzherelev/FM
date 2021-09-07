@@ -182,6 +182,7 @@ int main(int args, char **argv) {
         std::cout << "[PARAMETERS]: Wrong set of args, enter only the file name to run specific test" << std::endl;
         std::cout << "[HOW TO RUN]: Executable file should be in the same directory as the benchmarks" << std::endl;
         std::cout << "[RESULTS]: Results will be stored in the same directory as the benchmarks"<< std::endl;
+
         std::exit(-255);
     }
 

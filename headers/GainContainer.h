@@ -34,6 +34,7 @@ public:
     std::pair<std::uint32_t, int> feasible_move_modified();
 
     void update(std::uint32_t vex_id, int weight);
+
 };
 
 
