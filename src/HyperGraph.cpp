@@ -25,6 +25,7 @@ HyperGraph::HyperGraph(const std::string &filename) {
                     nets_to_vertices[net_id].push_back(vex_id - 1);
                     vex_to_nets[vex_id - 1].push_back(net_id);
                 }
+
                 net_id++;
             }
         }

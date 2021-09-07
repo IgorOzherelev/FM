@@ -51,6 +51,7 @@ void Partition::rollback(const std::vector<std::uint32_t>& rollback_vex) {
 
     left_net_sizes = (std::uint32_t*)std::calloc(graph->nets_num, sizeof(std::uint32_t));
     right_net_sizes = (std::uint32_t*)std::calloc(graph->nets_num, sizeof(std::uint32_t));
+
     init_side_sizes();
 }
 

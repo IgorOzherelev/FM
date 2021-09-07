@@ -13,6 +13,7 @@ public:
     std::vector<std::vector<std::uint32_t>> vex_to_nets;
 
     ~HyperGraph() = default;
+
     explicit HyperGraph(const std::string& filename);
 };
 

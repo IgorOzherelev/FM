@@ -20,6 +20,7 @@ public:
     std::size_t imbalance = 0;
 
     ~Partition();
+
     Partition(HyperGraph *graph, std::size_t imbalance);
 
     void rollback(const std::vector<std::uint32_t>& rollback_vex);

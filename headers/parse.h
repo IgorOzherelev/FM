@@ -10,6 +10,4 @@
 
 std::vector<std::uint32_t> *parse_into_vec(const std::string& line);
 
-
-
 #endif //FM_PARSE_H

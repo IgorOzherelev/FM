@@ -17,6 +17,7 @@
 #include <cstdlib>
 
 std::string get_pwd();
+
 std::string get_input_file_name(const std::string& filename);
 
 #endif //FM_UTILS_H
